@@ -29,7 +29,7 @@ app.post("/signin", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  const user = UserModel.find({name:'sunil' }); 
+  const user = UserModel.find({ email: email, password: password }); //finds all the entries having name:'sunil'
 
   console.log("await");
 
