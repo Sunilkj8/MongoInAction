@@ -3,11 +3,17 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.ObjectId;
 
 const user = new Schema({
-  email: { type: String  },
+  email: { type: String },
   password: String,
   name: String,
 });
 
-const UserModel = mongoose.model("Users", user);
+const todo = new Schema({
+  title: String,
+  userId: ObjectId,
+});
 
-module.exports = { UserModel };
+const UserModel = mongoose.model("users", user);// It is an function containing collection name and the schema for the collection repectively
+const TodoModel = mongoose.model("todos", todo);
+
+module.exports = { UserModel ,TodoModel};

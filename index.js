@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const app = express();
 const mongoose = require("mongoose");
-const { UserModel } = require("./db");
+const { UserModel, TodoModel } = require("./db");
 mongoose.connect(
   "mongodb+srv://sunil2003jakhar:suniljakhar@cluster0.fv5pt.mongodb.net/demo-todo-app"
 );
@@ -38,6 +38,20 @@ app.post("/signin", async (req, res) => {
   }
 
   res.json({ message: "Request Submitted" });
+});
+
+app.post("/addtodos", async (req, res) => {
+  const email = req.body.email;
+  const todoTitle = req.body.todoTitle;
+  // const todoDescription
+  const user = await UserModel.findOne({ email: email });
+  const userId = user._id.toString();
+
+  // console.log(userId);
+
+  await TodoModel.insertOne({ title: todoTitle, userId: userId });
+
+  res.json({ message: "Todo Added" });
 });
 
 app.listen(3000, () => {
