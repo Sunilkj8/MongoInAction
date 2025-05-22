@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = "s3cret";
 const app = express();
 const mongoose = require("mongoose");
 const { UserModel, TodoModel } = require("./db");
@@ -28,24 +29,25 @@ app.post("/signup", async (req, res) => {
 app.post("/signin", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  try {
+    const user = await UserModel.findOne({ email: email, password: password }); //finds all the entries having name:'sunil'
 
-  const user = UserModel.find({ email: email, password: password }); //finds all the entries having name:'sunil'
-
-  console.log("await");
-
-  for await (const doc of user) {
-    console.log(doc);
+    const token = jwt.sign(user._id.toString(), JWT_SECRET);
+    console.log(token);
+    res.json({ token: token });
+  } catch (e) {
+    // console.log(e);
+    res.json({ message: "Invalid Credentials" });
   }
 
-  res.json({ message: "Request Submitted" });
+  // for await (const doc of user) {
+  //   console.log(doc);
+  // }
 });
 
-app.post("/addtodos", async (req, res) => {
-  const email = req.body.email;
+app.post("/addtodos", auth, async (req, res) => {
+  const userId = req.user._id.toString();
   const todoTitle = req.body.todoTitle;
-  // const todoDescription
-  const user = await UserModel.findOne({ email: email });
-  const userId = user._id.toString();
 
   // console.log(userId);
 
@@ -53,6 +55,21 @@ app.post("/addtodos", async (req, res) => {
 
   res.json({ message: "Todo Added" });
 });
+
+async function auth(req, res, next) {
+  const token = req.body.token;
+  try {
+    const userId = jwt.verify(token, JWT_SECRET);
+    // console.log(userId);
+    const user = await UserModel.findOne({ _id: userId }); // Get the user with the specified user id...
+    console.log("found user: \n", user);
+
+    req.user = user;
+    next();
+  } catch (e) {
+    res.json({ message: "Can't find the user with specified token" });
+  }
+}
 
 app.listen(3000, () => {
   console.log("app listening on port 3000");
