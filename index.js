@@ -56,13 +56,25 @@ app.post("/addtodos", auth, async (req, res) => {
   res.json({ message: "Todo Added" });
 });
 
+app.post("/gettodos", auth, async (req, res) => {
+  const userId = req.user._id.toString();
+
+  const todos = await TodoModel.find({ userId: userId });
+  // console.log("todos \n",todos);
+  const todosArr=[]
+  todos.forEach((elem)=>{
+    todosArr.push(elem.title)
+  })
+ res.json({todos:todosArr})
+});
+
 async function auth(req, res, next) {
   const token = req.body.token;
   try {
     const userId = jwt.verify(token, JWT_SECRET);
     // console.log(userId);
     const user = await UserModel.findOne({ _id: userId }); // Get the user with the specified user id...
-    console.log("found user: \n", user);
+    console.log("found user: \n", user.name);
 
     req.user = user;
     next();
